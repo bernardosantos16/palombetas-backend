@@ -1,0 +1,6 @@
+ALTER TABLE matches
+ADD CONSTRAINT fk_matches_winner
+FOREIGN KEY (winner_id)
+REFERENCES teams(id)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
