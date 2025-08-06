@@ -13,12 +13,11 @@ public class TeamController {
     @Autowired
     private TeamService teamService;
 
-    @PostMapping("/{matchId}")
+    @PostMapping("/generate-teams")
     public ResponseEntity<?> createTeams(
-            @RequestBody ConfirmedPlayersListDTO confirmedPlayersListDTO,
-            @PathVariable Long matchId
+            @RequestBody ConfirmedPlayersListDTO confirmedPlayersListDTO
     ){
-        var teams = teamService.generateTeams(confirmedPlayersListDTO, matchId);
+        var teams = teamService.generateTeams(confirmedPlayersListDTO);
 
         return ResponseEntity.ok(teams);
     }

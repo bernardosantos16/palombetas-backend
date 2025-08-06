@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PlayerService {
 
@@ -19,10 +21,17 @@ public class PlayerService {
     private PlayerRepository playerRepository;
 
     @Autowired
-    private MatchRepository matchRepository;
+    private MatchService matchService;
 
     @Autowired
     PlayerMapper playerMapper;
+
+
+    public PlayerEntity getPlayerEntityById(Long id) {
+        return playerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("jogador não encontrado com id: " + id));
+    }
+
 
     @Transactional
     public PlayerResponseDTO createPlayer(PlayerRequestDTO playerRequestDTO){
@@ -33,12 +42,10 @@ public class PlayerService {
 
     @Transactional
     public void setPlayerMvp(Long playerId, Long matchId) {
-        var match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Nenhuma partida encontrado"));
 
+        var match = matchService.getMatchEntityById(matchId);
 
-        var playerMvp = playerRepository.findById(playerId)
-                .orElseThrow(() -> new RuntimeException("Nenhum jogador encontrado"));
+        var playerMvp = this.getPlayerEntityById(playerId);
 
         var matchPlayerMvp = match.getPlayerMvp();
 
@@ -52,20 +59,30 @@ public class PlayerService {
 
     @Transactional
     public void changeRating(Long playerId, Double rating) {
-        var player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new RuntimeException("Nenhum jogador encontrado"));
+        var player = this.getPlayerEntityById(playerId);
         player.setRating(rating);
     }
 
     public PlayerResponseDTO getPlayerById(Long id){
-        var player = playerRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Nenhum jogador encontrado")
-        );
+        var player = this.getPlayerEntityById(id);
         return playerMapper.toPlayerResponseDTO(player);
     }
 
     public Page<PlayerResponseDTO> getAllPlayers(Pageable pageable) {
         return playerRepository.findAllByIsActiveTrueOrderByNameAsc(pageable)
                 .map(playerMapper::toPlayerResponseDTO);
+    }
+
+    public List<PlayerEntity> getListOfPlayersByIds(List<Long> playersIds) {
+        return playerRepository.findAllById(playersIds);
+    }
+
+    public List<PlayerEntity> getAllActivePlayers() {
+        return playerRepository.findAllByIsActiveTrue();
+    }
+
+    public void cleanTeamPlayers() {
+        playerRepository.findAllByIsActiveTrue()
+                .forEach(player -> player.setTeam(null));
     }
 }

@@ -23,16 +23,27 @@ public class MatchService {
     private TeamRepository teamRepository;
 
     @Autowired
-    private PlayerRepository playerRepository;
+    TeamService teamService;
+
+    @Autowired
+    private PlayerService playerService;
 
     @Autowired
     private MatchMapper matchMapper;
 
+
+    public MatchEntity getMatchEntityById(Long id) {
+        return matchRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Partida Não Encontrada"));
+    }
+
+
     @Transactional
     public MatchResponseDTO createMatch(MatchRequestDTO matchRequestDTO) {
         var matchEntity = new MatchEntity(matchRequestDTO);
-        var players = playerRepository.findAllByIsActiveTrue();
-        players.forEach(p -> p.setTeam(null));
+
+        playerService.cleanTeamPlayers();
+
         matchRepository.save(matchEntity);
         // Convert saved entity back to DTO and return
         return matchMapper.toMatchResponseDTO(matchEntity);
@@ -40,18 +51,15 @@ public class MatchService {
 
     @Transactional
     public void setMatchWinner(Long teamId, Long matchId) {
-        var team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new RuntimeException("Time não encotrado")
-                );
-        var match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Nenhuma partida encontrada"));
+
+        var team = teamService.getTeamEntityById(teamId);
+        var match = this.getMatchEntityById(matchId);
 
         match.setWinner(team);
     }
 
     public MatchResponseDTO getMatchById(Long id) {
-        var match = matchRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Nenhuma partida encontrada"));
+        var match = this.getMatchEntityById(id);
         return matchMapper.toMatchResponseDTO(match);
     }
 
