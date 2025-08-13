@@ -2,10 +2,13 @@ package com.palombetas.api.gerartimes.controller;
 
 import com.palombetas.api.gerartimes.domain.dto.request.ConfirmedPlayersListDTO;
 import com.palombetas.api.gerartimes.domain.dto.request.PlayerSwapDTO;
+import com.palombetas.api.gerartimes.domain.dto.response.TeamResponseDTO;
 import com.palombetas.api.gerartimes.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/teams")
@@ -14,7 +17,7 @@ public class TeamController {
     private TeamService teamService;
 
     @PostMapping("/generate-teams")
-    public ResponseEntity<?> createTeams(
+    public ResponseEntity<List<TeamResponseDTO>> createTeams(
             @RequestBody ConfirmedPlayersListDTO confirmedPlayersListDTO
     ){
         var teams = teamService.generateTeams(confirmedPlayersListDTO);
@@ -23,7 +26,7 @@ public class TeamController {
     }
 
     @PutMapping("/swap-players")
-    public ResponseEntity<?> swapPlayers(
+    public ResponseEntity<String> swapPlayers(
             @RequestBody PlayerSwapDTO playerSwapDTO
     ) {
         teamService.swapPlayers(playerSwapDTO);
@@ -31,7 +34,7 @@ public class TeamController {
     }
 
 //    @GetMapping("/{teamId}")
-//    public ResponseEntity<?> getTeamById(
+//    public ResponseEntity<TeamResponseDTO> getTeamById(
 //            @PathVariable Long teamId
 //    ) {
 //        var teamResponseDTO = teamService.getTeamById(teamId);

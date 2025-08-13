@@ -1,7 +1,10 @@
 package com.palombetas.api.gerartimes.validation.teams.generate;
 
 import com.palombetas.api.gerartimes.domain.dto.request.ConfirmedPlayersListDTO;
+import org.springframework.stereotype.Component;
 
+
+@Component("validateTotalPlayers")
 public class ValidateTotalPlayers implements IValidatorGenerateTeams {
     @Override
     public void validate(ConfirmedPlayersListDTO confirmedPlayersListDTO) {

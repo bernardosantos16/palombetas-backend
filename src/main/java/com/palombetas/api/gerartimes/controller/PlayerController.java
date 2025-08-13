@@ -1,8 +1,10 @@
 package com.palombetas.api.gerartimes.controller;
 
 import com.palombetas.api.gerartimes.domain.dto.request.PlayerRequestDTO;
+import com.palombetas.api.gerartimes.domain.dto.response.PlayerResponseDTO;
 import com.palombetas.api.gerartimes.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +18,7 @@ public class PlayerController {
     private PlayerService playerService;
 
     @PostMapping
-    public ResponseEntity<?> createPlayer(
+    public ResponseEntity<PlayerResponseDTO> createPlayer(
             @RequestBody PlayerRequestDTO playerRequestDTO
     ) {
         var playerResponseDTO = playerService.createPlayer(playerRequestDTO);
@@ -24,30 +26,42 @@ public class PlayerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPlayerById(@PathVariable Long id) {
-        var dto = playerService.getPlayerById(id);
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<PlayerResponseDTO> getPlayerById(@PathVariable Long id) {
+        var playerResponseDTO = playerService.getPlayerById(id);
+        return ResponseEntity.ok(playerResponseDTO);
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllPlayers(
-            @PageableDefault(size = 10 , sort = "id") Pageable pageable
+    public ResponseEntity<Page<PlayerResponseDTO>> getAllPlayers(
+            @PageableDefault(/*size = 10 ,*/ sort = "id") Pageable pageable
     ) {
         var players = playerService.getAllPlayers(pageable);
         return ResponseEntity.ok(players);
     }
 
-    @PutMapping("/{playerId}/{matchId}")
-    public ResponseEntity<?> setPlayerMvp(
-            @PathVariable Long playerId,
-            @PathVariable Long matchId
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deletePlayer(@PathVariable Long id) {
+        playerService.deletePlayer(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/active/{id}")
+    public ResponseEntity<Void> activatePlayer(@PathVariable Long id) {
+        playerService.activatePlayer(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/mvp")
+    public ResponseEntity<String> setPlayerMvp(
+            @RequestParam Long playerId,
+            @RequestParam Long matchId
     ) {
         playerService.setPlayerMvp(playerId, matchId);
         return ResponseEntity.ok("Jogador melhor da partida sucesso");
     }
 
     @PutMapping("/{playerId}/rating")
-    public ResponseEntity<?> changeRating(
+    public ResponseEntity<String> changeRating(
             @PathVariable Long playerId,
             @RequestParam Double rating
     ) {

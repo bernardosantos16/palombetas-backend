@@ -42,4 +42,12 @@ public class PlayerEntity {
                 this.getTimesChampion() * 0.5 +
                 this.getTimesMvp() * 0.3;
     }
+
+    public void deletePlayer() {
+        this.setIsActive(false);
+        this.setTeam(null);
+    }
+    public void activatePlayer() {
+        this.setIsActive(true);
+    }
 }

@@ -1,11 +1,12 @@
 package com.palombetas.api.gerartimes.service;
 
+import com.palombetas.api.gerartimes.domain.business.MatchBusinessService;
+import com.palombetas.api.gerartimes.domain.business.PlayerBusinessService;
 import com.palombetas.api.gerartimes.domain.dto.request.PlayerRequestDTO;
 import com.palombetas.api.gerartimes.domain.dto.response.PlayerResponseDTO;
 import com.palombetas.api.gerartimes.domain.entity.PlayerEntity;
 import com.palombetas.api.gerartimes.mapper.PlayerMapper;
-import com.palombetas.api.gerartimes.repository.MatchRepository;
-import com.palombetas.api.gerartimes.repository.PlayerRepository;
+import com.palombetas.api.gerartimes.domain.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,16 +22,18 @@ public class PlayerService {
     private PlayerRepository playerRepository;
 
     @Autowired
-    private MatchService matchService;
+    private MatchBusinessService matchBusinessService;
+
+    @Autowired
+    private PlayerBusinessService playerBusinessService;
 
     @Autowired
     PlayerMapper playerMapper;
 
 
-    public PlayerEntity getPlayerEntityById(Long id) {
-        return playerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("jogador não encontrado com id: " + id));
-    }
+//    public PlayerEntity getPlayerEntityById(Long id) {
+//        return playerBusinessService.getPlayerEntityById(id);
+//    }
 
 
     @Transactional
@@ -42,11 +45,8 @@ public class PlayerService {
 
     @Transactional
     public void setPlayerMvp(Long playerId, Long matchId) {
-
-        var match = matchService.getMatchEntityById(matchId);
-
-        var playerMvp = this.getPlayerEntityById(playerId);
-
+        var match = matchBusinessService.getMatchEntityById(matchId);
+        var playerMvp = playerBusinessService.getPlayerEntityById(playerId);
         var matchPlayerMvp = match.getPlayerMvp();
 
         if (matchPlayerMvp != null) {
@@ -59,12 +59,12 @@ public class PlayerService {
 
     @Transactional
     public void changeRating(Long playerId, Double rating) {
-        var player = this.getPlayerEntityById(playerId);
+        var player = playerBusinessService.getPlayerEntityById(playerId);
         player.setRating(rating);
     }
 
     public PlayerResponseDTO getPlayerById(Long id){
-        var player = this.getPlayerEntityById(id);
+        var player = playerBusinessService.getPlayerEntityById(id);
         return playerMapper.toPlayerResponseDTO(player);
     }
 
@@ -74,15 +74,28 @@ public class PlayerService {
     }
 
     public List<PlayerEntity> getListOfPlayersByIds(List<Long> playersIds) {
-        return playerRepository.findAllById(playersIds);
+        return playerBusinessService.getListOfPlayersByIds(playersIds);
     }
 
     public List<PlayerEntity> getAllActivePlayers() {
-        return playerRepository.findAllByIsActiveTrue();
+        return playerBusinessService.getAllActivePlayers();
     }
 
     public void cleanTeamPlayers() {
         playerRepository.findAllByIsActiveTrue()
                 .forEach(player -> player.setTeam(null));
     }
+
+    @Transactional
+    public void deletePlayer(Long playerId) {
+        var player = playerBusinessService.getPlayerEntityById(playerId);
+        player.deletePlayer();
+    }
+
+    @Transactional
+    public void activatePlayer(Long playerId) {
+        var player = playerBusinessService.getPlayerEntityById(playerId);
+        player.activatePlayer();
+    }
+
 }

@@ -1,4 +1,4 @@
-package com.palombetas.api.gerartimes.repository;
+package com.palombetas.api.gerartimes.domain.repository;
 
 import com.palombetas.api.gerartimes.domain.entity.MatchEntity;
 import org.springframework.data.domain.Page;

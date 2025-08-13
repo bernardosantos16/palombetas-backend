@@ -1,4 +1,4 @@
-package com.palombetas.api.gerartimes.repository;
+package com.palombetas.api.gerartimes.domain.repository;
 
 import com.palombetas.api.gerartimes.domain.entity.PlayerEntity;
 import org.springframework.data.domain.Page;
@@ -11,4 +11,5 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, Long> {
 
     Page<PlayerEntity> findAllByIsActiveTrueOrderByNameAsc(Pageable pageable);
     List<PlayerEntity> findAllByIsActiveTrue();
+    Boolean existsByIdAndIsActiveTrue(Long id);
 }

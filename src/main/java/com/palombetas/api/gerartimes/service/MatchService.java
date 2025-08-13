@@ -4,9 +4,9 @@ import com.palombetas.api.gerartimes.domain.dto.request.MatchRequestDTO;
 import com.palombetas.api.gerartimes.domain.dto.response.MatchResponseDTO;
 import com.palombetas.api.gerartimes.domain.entity.MatchEntity;
 import com.palombetas.api.gerartimes.mapper.MatchMapper;
-import com.palombetas.api.gerartimes.repository.MatchRepository;
-import com.palombetas.api.gerartimes.repository.PlayerRepository;
-import com.palombetas.api.gerartimes.repository.TeamRepository;
+import com.palombetas.api.gerartimes.domain.business.MatchBusinessService;
+import com.palombetas.api.gerartimes.domain.business.TeamBusinessService;
+import com.palombetas.api.gerartimes.domain.repository.MatchRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,10 +20,10 @@ public class MatchService {
     private MatchRepository matchRepository;
 
     @Autowired
-    private TeamRepository teamRepository;
+    private MatchBusinessService matchBusinessService;
 
     @Autowired
-    TeamService teamService;
+    private TeamBusinessService teamBusinessService;
 
     @Autowired
     private PlayerService playerService;
@@ -33,8 +33,7 @@ public class MatchService {
 
 
     public MatchEntity getMatchEntityById(Long id) {
-        return matchRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Partida Não Encontrada"));
+        return matchBusinessService.getMatchEntityById(id);
     }
 
 
@@ -51,11 +50,11 @@ public class MatchService {
 
     @Transactional
     public void setMatchWinner(Long teamId, Long matchId) {
-
-        var team = teamService.getTeamEntityById(teamId);
+        var team = teamBusinessService.getTeamEntityById(teamId);
         var match = this.getMatchEntityById(matchId);
 
         match.setWinner(team);
+        matchRepository.save(match);
     }
 
     public MatchResponseDTO getMatchById(Long id) {

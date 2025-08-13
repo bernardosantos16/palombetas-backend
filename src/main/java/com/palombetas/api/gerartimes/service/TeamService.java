@@ -1,5 +1,6 @@
 package com.palombetas.api.gerartimes.service;
 
+import com.palombetas.api.gerartimes.domain.business.PlayerBusinessService;
 import com.palombetas.api.gerartimes.domain.dto.request.ConfirmedPlayersListDTO;
 import com.palombetas.api.gerartimes.domain.dto.request.PlayerSwapDTO;
 import com.palombetas.api.gerartimes.domain.dto.response.PlayerResponseDTO;
@@ -9,13 +10,14 @@ import com.palombetas.api.gerartimes.domain.entity.PlayerEntity;
 import com.palombetas.api.gerartimes.domain.entity.TeamEntity;
 import com.palombetas.api.gerartimes.mapper.PlayerMapper;
 import com.palombetas.api.gerartimes.mapper.TeamMapper;
-import com.palombetas.api.gerartimes.repository.MatchRepository;
-import com.palombetas.api.gerartimes.repository.PlayerRepository;
-import com.palombetas.api.gerartimes.repository.TeamRepository;
+import com.palombetas.api.gerartimes.domain.business.MatchBusinessService;
+import com.palombetas.api.gerartimes.domain.business.TeamBusinessService;
+import com.palombetas.api.gerartimes.domain.repository.TeamRepository;
 import com.palombetas.api.gerartimes.validation.teams.generate.IValidatorGenerateTeams;
 import com.palombetas.api.gerartimes.validation.teams.swap.IValidatorSwapPlayers;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,46 +28,41 @@ import java.util.List;
 public class TeamService {
 
     @Autowired
-    private PlayerRepository playerRepository;
-
-    @Autowired
     private PlayerMapper playerMapper;
 
     @Autowired
     private TeamRepository teamRepository;
 
     @Autowired
-    private MatchService matchService;
+    private MatchBusinessService matchBusinessService;
 
     @Autowired
-    private PlayerService playerService;
+    private TeamBusinessService teamBusinessService;
+
+    @Autowired
+    private PlayerBusinessService playerBusinessService;
 
     @Autowired
     private TeamMapper teamMapper;
 
-    @Autowired List<IValidatorSwapPlayers> swapPlayerValidators;
+    @Autowired
+    @Lazy
+    List<IValidatorSwapPlayers> swapPlayerValidators;
 
-    @Autowired List<IValidatorGenerateTeams> generateTeamsValidators;
+    @Autowired
+    List<IValidatorGenerateTeams> generateTeamsValidators;
 
 
     public TeamEntity getTeamEntityById(Long id) {
-        return teamRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Time não encontrado com id: " + id));
+        return teamBusinessService.getTeamEntityById(id);
     }
-
-//    private void validateTotalPlayers(Integer totalPlayers) {
-//        if (totalPlayers < 10) {
-//            throw new RuntimeException("Número de jogadores insuficiente para formar ao menos dois times. É necessário pelo menos 10 jogadores.");
-//        }
-//    }
 
     private Integer calculateTotalTeams(Integer totalPlayers, Integer playersPerTeam) {
         return totalPlayers / playersPerTeam;
     }
 
 
-
-    private List<List<PlayerEntity>> distributePlayersIntoBalancedTeams(List<PlayerEntity> players, Integer totalTeams, Integer totalPlayers){
+    private List<List<PlayerEntity>> distributePlayersIntoBalancedTeams(List<PlayerEntity> players, Integer totalTeams, Integer totalPlayers) {
         players.sort(Comparator.comparing(PlayerEntity::calculatePlayerForce).reversed());
 
         List<List<PlayerEntity>> teamPlayerEntities = new ArrayList<>();
@@ -87,7 +84,6 @@ public class TeamService {
     }
 
     private List<TeamEntity> persistTeams(List<List<PlayerEntity>> teamPlayerEntities, MatchEntity match) {
-        List<TeamResponseDTO> teamsResponse = new ArrayList<>();
         List<TeamEntity> teamEntityList = new ArrayList<>();
         for (int i = 0; i < teamPlayerEntities.size(); i++) {
             List<PlayerEntity> teamPlayers = teamPlayerEntities.get(i);
@@ -114,18 +110,18 @@ public class TeamService {
         List<TeamResponseDTO> teamsResponse = new ArrayList<>();
 
         teamEntityList.forEach(
-            teamEntity -> {
-                List<PlayerResponseDTO> playerDTOs = teamEntity.getPlayers().stream()
-                        .map(playerMapper::toPlayerResponseDTO)
-                        .toList();
+                teamEntity -> {
+                    List<PlayerResponseDTO> playerDTOs = teamEntity.getPlayers().stream()
+                            .map(playerMapper::toPlayerResponseDTO)
+                            .toList();
 
-                teamsResponse.add(new TeamResponseDTO(
-                        teamEntity.getId(),
-                        teamEntity.getName(),
-                        teamEntity.getRating(),
-                        playerDTOs
-                ));
-            }
+                    teamsResponse.add(new TeamResponseDTO(
+                            teamEntity.getId(),
+                            teamEntity.getName(),
+                            teamEntity.getRating(),
+                            playerDTOs
+                    ));
+                }
         );
 
         return teamsResponse;
@@ -137,11 +133,11 @@ public class TeamService {
             ConfirmedPlayersListDTO confirmedPlayersList
     ) {
         // Buscar a partida
-        MatchEntity match = matchService.getMatchEntityById(confirmedPlayersList.matchId());
+        MatchEntity match = matchBusinessService.getMatchEntityById(confirmedPlayersList.matchId());
 
         // Buscar os jogadores confirmados no banco
 
-        List<PlayerEntity> players = playerService.getListOfPlayersByIds(confirmedPlayersList.playersIds());
+        List<PlayerEntity> players = playerBusinessService.getListOfPlayersByIds(confirmedPlayersList.playersIds());
 
         int totalPlayers = players.size();
         int playersPerTeam = confirmedPlayersList.playersPerTeam();
@@ -162,8 +158,8 @@ public class TeamService {
         var playerId1 = playerSwapDTO.playerId1();
         var playerId2 = playerSwapDTO.playerId2();
 
-        PlayerEntity player1 = playerService.getPlayerEntityById(playerId1);
-        PlayerEntity player2 = playerService.getPlayerEntityById(playerId2);
+        PlayerEntity player1 = playerBusinessService.getPlayerEntityById(playerId1);
+        PlayerEntity player2 = playerBusinessService.getPlayerEntityById(playerId2);
 
         TeamEntity team1 = player1.getTeam();
         TeamEntity team2 = player2.getTeam();
@@ -189,8 +185,7 @@ public class TeamService {
     }
 
     public TeamResponseDTO getTeamById(Long id) {
-        TeamEntity team = teamRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Time não encontrado"));
+        TeamEntity team = teamBusinessService.getTeamEntityById(id);
         return teamMapper.toTeamResponseDTO(team);
     }
 }
