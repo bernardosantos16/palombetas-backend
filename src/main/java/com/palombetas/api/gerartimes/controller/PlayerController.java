@@ -3,6 +3,7 @@ package com.palombetas.api.gerartimes.controller;
 import com.palombetas.api.gerartimes.domain.dto.request.PlayerRequestDTO;
 import com.palombetas.api.gerartimes.domain.dto.response.PlayerResponseDTO;
 import com.palombetas.api.gerartimes.service.PlayerService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,7 @@ public class PlayerController {
 
     @PostMapping
     public ResponseEntity<PlayerResponseDTO> createPlayer(
-            @RequestBody PlayerRequestDTO playerRequestDTO
+            @RequestBody @Valid PlayerRequestDTO playerRequestDTO
     ) {
         var playerResponseDTO = playerService.createPlayer(playerRequestDTO);
         return ResponseEntity.ok(playerResponseDTO);
@@ -63,7 +64,7 @@ public class PlayerController {
     @PutMapping("/{playerId}/rating")
     public ResponseEntity<String> changeRating(
             @PathVariable Long playerId,
-            @RequestParam Double rating
+            @RequestParam Integer rating
     ) {
         playerService.changeRating(playerId, rating);
         return ResponseEntity.ok("Rating do jogador alterado com sucesso");

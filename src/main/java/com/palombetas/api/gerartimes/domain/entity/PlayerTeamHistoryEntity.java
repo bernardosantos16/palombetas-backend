@@ -3,6 +3,7 @@ package com.palombetas.api.gerartimes.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+//TODO
 @Entity
 @Table(name = "player_team_history")
 @AllArgsConstructor

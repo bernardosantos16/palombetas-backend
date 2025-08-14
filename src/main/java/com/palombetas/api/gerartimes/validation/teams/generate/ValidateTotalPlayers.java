@@ -1,6 +1,8 @@
 package com.palombetas.api.gerartimes.validation.teams.generate;
 
 import com.palombetas.api.gerartimes.domain.dto.request.ConfirmedPlayersListDTO;
+import com.palombetas.api.gerartimes.infra.exception.GenericCustomException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 
@@ -12,8 +14,12 @@ public class ValidateTotalPlayers implements IValidatorGenerateTeams {
         int minimumPlayers = confirmedPlayersListDTO.playersPerTeam() * 2;
 
         if (totalPlayers < minimumPlayers) {
-            throw new RuntimeException(
-                    "Número de jogadores insuficiente para formar ao menos dois times. É necessário pelo menos " + minimumPlayers + " jogadores.");
+            throw new GenericCustomException(
+                    "about:blank",
+                    "insufficient players",
+                    HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "There are no minimum players to form at least two teams"
+            );
         }
     }
 }

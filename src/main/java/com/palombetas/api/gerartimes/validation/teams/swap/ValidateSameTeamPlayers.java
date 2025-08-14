@@ -3,7 +3,9 @@ package com.palombetas.api.gerartimes.validation.teams.swap;
 import com.palombetas.api.gerartimes.domain.dto.request.PlayerSwapDTO;
 import com.palombetas.api.gerartimes.domain.entity.TeamEntity;
 import com.palombetas.api.gerartimes.domain.repository.PlayerRepository;
+import com.palombetas.api.gerartimes.infra.exception.GenericCustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,7 +22,12 @@ public class ValidateSameTeamPlayers implements IValidatorSwapPlayers {
         TeamEntity team2 = player2.getTeam();
 
         if (team1.equals(team2)) {
-            throw new RuntimeException("Os jogadores devem estar em times diferentes para serem trocados.");
+            throw new GenericCustomException(
+                    "about:blank",
+                    "same team players",
+                    HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "the players already same team."
+            );
         }
     }
 }

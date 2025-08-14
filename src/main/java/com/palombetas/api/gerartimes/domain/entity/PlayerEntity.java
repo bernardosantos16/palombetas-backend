@@ -17,7 +17,7 @@ public class PlayerEntity {
     private Long id;
 
     private String name;
-    private Double rating;
+    private Integer rating;
     private Integer timesChampion;
     private Integer timesMvp;
 
@@ -38,7 +38,7 @@ public class PlayerEntity {
     }
 
     public Double calculatePlayerForce() {
-        return this.getRating() * 1.0 +
+        return  this.getRating() * 1.0 +
                 this.getTimesChampion() * 0.5 +
                 this.getTimesMvp() * 0.3;
     }

@@ -58,7 +58,7 @@ public class PlayerService {
     }
 
     @Transactional
-    public void changeRating(Long playerId, Double rating) {
+    public void changeRating(Long playerId, Integer rating) {
         var player = playerBusinessService.getPlayerEntityById(playerId);
         player.setRating(rating);
     }

@@ -5,7 +5,7 @@ import com.palombetas.api.gerartimes.domain.entity.PlayerEntity;
 public record PlayerResponseDTO(
         Long id,
         String name,
-        Double rating,
+        Integer rating,
         Integer timesChampion,
         Integer timesMvp
 ) {

@@ -26,9 +26,9 @@ public class ValidateTeamPlayers implements IValidatorSwapPlayers {
         if (team1 == null || team2 == null) {
             throw new GenericCustomException(
                     "about:blank",
-                    "jogadores-sem-time",
+                    "player(s) without a team",
                     HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                    "Ambos os jogadores devem estar alocados em times para realizar a troca."
+                    "Both players must be assigned to teams to perform the swap."
             );
         }
     }
